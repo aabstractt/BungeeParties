@@ -1,0 +1,7 @@
+name: BungeeParties
+version: 0.1
+main: dev.thatsmybaby.BungeePartiesPlugin
+author: thatsmybaby
+
+softdepend:
+  - RedisBungee
