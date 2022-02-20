@@ -35,41 +35,41 @@ public class PartyFactory extends RedisProvider {
     }
 
     /**
-     * @param whoSent    Who sent the invite request
-     * @param whoReceive Who need accept the invite request
+     * @param whoSent    Who sent the request
+     * @param whoAccept Who accept the request
      */
     @Override
-    public void invitePlayer(UUID whoSent, UUID whoReceive) {
+    public void invitePlayer(UUID whoSent, UUID whoAccept) {
         if (this.enabled()) {
-            super.invitePlayer(whoSent, whoReceive);
+            super.invitePlayer(whoSent, whoAccept);
 
             return;
         }
 
         Set<UUID> invitesSent = this.pendingInvitesSent.computeIfAbsent(whoSent, k -> new HashSet<>());
 
-        invitesSent.add(whoReceive);
+        invitesSent.add(whoAccept);
     }
 
     /**
-     * @param whoSent    Who sent the invite request
-     * @param whoReceive Who need accept the invite request
+     * @param whoSent    Who sent the request
+     * @param whoAccept Who accept the request
      */
     @Override
-    public void removePendingInvite(UUID whoSent, UUID whoReceive) {
+    public void removePendingInvite(UUID whoSent, UUID whoAccept) {
         if (this.enabled()) {
-            super.removePendingInvite(whoSent, whoReceive);
+            super.removePendingInvite(whoSent, whoAccept);
 
             return;
         }
 
         Set<UUID> invitesSent = this.pendingInvitesSent.get(whoSent);
 
-        if (invitesSent == null || !invitesSent.contains(whoReceive)) {
+        if (invitesSent == null || !invitesSent.contains(whoAccept)) {
             return;
         }
 
-        invitesSent.remove(whoReceive);
+        invitesSent.remove(whoAccept);
     }
 
     /**
@@ -94,16 +94,16 @@ public class PartyFactory extends RedisProvider {
     }
 
     /**
-     * @param whoSent    Who sent the invite request
-     * @param whoReceive Who need accept the invite request
+     * @param whoSent    Who sent the request
+     * @param whoAccept Who accept the request
      */
     @Override
-    public boolean isPendingInvite(UUID whoSent, UUID whoReceive) {
+    public boolean isPendingInvite(UUID whoSent, UUID whoAccept) {
         if (this.enabled()) {
-            return super.isPendingInvite(whoSent, whoReceive);
+            return super.isPendingInvite(whoSent, whoAccept);
         }
 
-        return this.pendingInvitesSent.getOrDefault(whoSent, new HashSet<>()).contains(whoReceive);
+        return this.pendingInvitesSent.getOrDefault(whoSent, new HashSet<>()).contains(whoAccept);
     }
 
     public BungeePartyImpl getPlayerParty(UUID uniqueId) {
@@ -130,7 +130,7 @@ public class PartyFactory extends RedisProvider {
 
     public void messageParty(BungeePartyImpl party, BaseComponent[] components) {
         if (this.enabled()) {
-            super.messageParty(party, ComponentSerializer.toString(components));
+            super.messageParty(party.getUniqueId(), ComponentSerializer.toString(components));
 
             return;
         }

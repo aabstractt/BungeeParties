@@ -42,10 +42,18 @@ public abstract class RedisProvider {
         return null;
     }
 
-    public void invitePlayer(UUID whoSent, UUID whoReceive) {
+    /**
+     * @param whoSent    Who sent the request
+     * @param whoAccept Who accept the request
+     */
+    public void invitePlayer(UUID whoSent, UUID whoAccept) {
     }
 
-    public void removePendingInvite(UUID whoSent, UUID whoReceive) {
+    /**
+     * @param whoSent    Who sent the request
+     * @param whoAccept Who accept the request
+     */
+    public void removePendingInvite(UUID whoSent, UUID whoAccept) {
 
     }
 
@@ -53,7 +61,11 @@ public abstract class RedisProvider {
 
     }
 
-    public boolean isPendingInvite(UUID whoSent, UUID whoReceive) {
+    /**
+     * @param whoSent    Who sent the request
+     * @param whoAccept Who accept the request
+     */
+    public boolean isPendingInvite(UUID whoSent, UUID whoAccept) {
         return false;
     }
 
@@ -65,7 +77,7 @@ public abstract class RedisProvider {
 
     }
 
-    public void messageParty(BungeePartyImpl party, String message) {
+    public void messageParty(UUID partyUniqueId, String message) {
 
     }
 
