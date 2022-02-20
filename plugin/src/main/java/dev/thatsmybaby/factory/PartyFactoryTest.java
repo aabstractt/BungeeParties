@@ -23,7 +23,7 @@ public class PartyFactoryTest extends RedisProvider {
     }
 
     public void invitePlayer(UUID whoSent, UUID whoReceive) {
-        if (isRedisEnabled()) {
+        if (this.enabled()) {
             System.out.println("Redis enabled");
 
             super.invitePlayer(whoSent, whoReceive);

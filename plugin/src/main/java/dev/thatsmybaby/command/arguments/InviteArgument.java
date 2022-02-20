@@ -1,6 +1,6 @@
 package dev.thatsmybaby.command.arguments;
 
-import dev.thatsmybaby.PartiesPlugin;
+import dev.thatsmybaby.BungeePartiesPlugin;
 import dev.thatsmybaby.command.Argument;
 import dev.thatsmybaby.factory.PartyFactory;
 import dev.thatsmybaby.shared.Placeholders;
@@ -27,7 +27,8 @@ public class InviteArgument extends Argument {
             return;
         }
 
-        UUID targetUniqueId = getTargetPlayer(args[0]);
+        PartyFactory factory = PartyFactory.getInstance();
+        UUID targetUniqueId = factory.getTargetPlayer(args[0]);
 
         if (targetUniqueId == null) {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("PLAYER_NOT_FOUND", args[0]));
@@ -35,42 +36,43 @@ public class InviteArgument extends Argument {
             return;
         }
 
-        if (targetUniqueId.equals(proxiedPlayer.getUniqueId())) {
+        if (BungeePartiesPlugin.released() && targetUniqueId.equals(proxiedPlayer.getUniqueId())) {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("YOU_CANNOT_INVITE_THIS_PLAYER", args[0]));
 
             return;
         }
 
-        String serverName = this.getTargetServer(targetUniqueId);
+        String serverName = factory.getTargetServer(targetUniqueId);
 
-        if (serverName == null || PartiesPlugin.serversBlockedAction.contains(serverName)) {
+        if (serverName == null || BungeePartiesPlugin.serversBlockedAction.contains(serverName)) {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("YOU_CANNOT_INVITE_THIS_PLAYER", args[0]));
 
             return;
         }
 
-        if (PartyFactory.getInstance().isPendingInvite(proxiedPlayer.getUniqueId(), targetUniqueId)) {
+        if (factory.isPendingInvite(proxiedPlayer.getUniqueId(), targetUniqueId)) {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("PLAYER_ALREADY_INVITED", args[0]));
 
             return;
         }
 
-        if (PartyFactory.getInstance().getPlayerParty(targetUniqueId) != null) {
+        if (factory.getPlayerParty(targetUniqueId) != null) {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("PLAYER_ALREADY_IN_PARTY", args[0]));
 
             return;
         }
 
-        BungeePartyImpl party = PartyFactory.getInstance().getPlayerParty(proxiedPlayer.getUniqueId());
+        BungeePartyImpl party = factory.getPlayerParty(proxiedPlayer.getUniqueId());
 
         if (party != null) {
-            party.broadcastMessage(Placeholders.componentsPlaceholders("PLAYER_SUCCESSFULLY_INVITED", args[0]));
+            factory.messageParty(party, Placeholders.componentsPlaceholders("PLAYER_SUCCESSFULLY_INVITED", args[0]));
         } else {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("PLAYER_SUCCESSFULLY_INVITED", args[0]));
         }
 
-        PartyFactory.getInstance().invitePlayer(proxiedPlayer.getUniqueId(), targetUniqueId);
+        factory.invitePlayer(proxiedPlayer.getUniqueId(), targetUniqueId);
+        factory.messagePlayer(targetUniqueId, Placeholders.componentsPlaceholders("PARTY_INVITE_RECEIVED", proxiedPlayer.getName()));
 
-        ProxyServer.getInstance().getScheduler().schedule(PartiesPlugin.getInstance(), () -> PartyFactory.getInstance().removePendingInvite(proxiedPlayer.getUniqueId(), targetUniqueId), 20, TimeUnit.SECONDS);
+        ProxyServer.getInstance().getScheduler().schedule(BungeePartiesPlugin.getInstance(), () -> factory.removePendingInvite(proxiedPlayer.getUniqueId(), targetUniqueId), 20, TimeUnit.SECONDS);
     }
 }
