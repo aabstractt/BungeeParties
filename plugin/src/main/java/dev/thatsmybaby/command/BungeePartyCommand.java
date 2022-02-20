@@ -1,6 +1,7 @@
 package dev.thatsmybaby.command;
 
 import dev.thatsmybaby.command.arguments.InviteArgument;
+import dev.thatsmybaby.factory.PartyFactory;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -16,7 +17,7 @@ public class BungeePartyCommand extends Command {
         super(name);
 
         this.addArguments(
-                new InviteArgument("invite", null, null)
+                new InviteArgument("invite", null, null, PartyFactory.getInstance().isRedisEnabled())
         );
     }
 

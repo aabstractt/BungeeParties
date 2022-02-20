@@ -4,7 +4,6 @@ import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.chat.ComponentSerializer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -20,24 +19,26 @@ public class BungeePartyImpl {
     @Getter private final Set<String> membersUniqueId = new HashSet<>();
     @Getter private final Set<String> membersName = new HashSet<>();
 
-    public boolean redis = false;
+    private boolean redis;
 
-    public BungeePartyImpl(String ownerUniqueId, String ownerName) {
+    public BungeePartyImpl(String ownerUniqueId, String ownerName, boolean redis) {
         this.ownerUniqueId = ownerUniqueId;
 
         this.ownerName = ownerName;
+
+        this.redis = redis;
     }
 
-    public void transferTo(String ownerUniqueId, String ownerName) {
+    public void transferTo(String targetUniqueId, String targetName) {
         // TODO: Move this to the promote command
         this.addMember(this.ownerUniqueId, this.ownerName);
 
-        this.ownerUniqueId = ownerUniqueId;
+        this.ownerUniqueId = targetUniqueId;
 
-        this.ownerName = ownerName;
+        this.ownerName = targetName;
 
         // TODO: Move this to the promote command
-        this.removeMember(ownerUniqueId, ownerName);
+        this.removeMember(targetUniqueId, targetName);
     }
 
     public void addMember(ProxiedPlayer proxiedPlayer) {

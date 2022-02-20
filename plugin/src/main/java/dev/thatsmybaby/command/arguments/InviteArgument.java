@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public class InviteArgument extends Argument {
 
-    public InviteArgument(String name, String permission, String[] aliases) {
-        super(name, permission, aliases);
+    public InviteArgument(String name, String permission, String[] aliases, boolean async) {
+        super(name, permission, aliases, async);
     }
 
     @Override
@@ -71,8 +71,6 @@ public class InviteArgument extends Argument {
 
         PartyFactory.getInstance().invitePlayer(proxiedPlayer.getUniqueId(), targetUniqueId);
 
-        ProxyServer.getInstance().getScheduler().schedule(PartiesPlugin.getInstance(), () -> {
-            PartyFactory.getInstance().removePendingInvite(proxiedPlayer.getUniqueId(), targetUniqueId);
-        }, 20, TimeUnit.SECONDS);
+        ProxyServer.getInstance().getScheduler().schedule(PartiesPlugin.getInstance(), () -> PartyFactory.getInstance().removePendingInvite(proxiedPlayer.getUniqueId(), targetUniqueId), 20, TimeUnit.SECONDS);
     }
 }

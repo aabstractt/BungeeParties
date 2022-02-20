@@ -17,12 +17,12 @@ public class PartyFactory extends RedisProvider {
     private final HashMap<UUID, Set<UUID>> pendingInvitesSent = new HashMap<>();
 
     public BungeePartyImpl initializeParty(ProxiedPlayer proxiedPlayer) {
-        return new BungeePartyImpl(proxiedPlayer.getUniqueId().toString(), proxiedPlayer.getName());
+        return new BungeePartyImpl(proxiedPlayer.getUniqueId().toString(), proxiedPlayer.getName(), PartyFactory.getInstance().isRedisEnabled());
     }
 
     /**
-     * @param whoSent       Who sent the invite request
-     * @param whoReceive        Who need accept the invite request
+     * @param whoSent    Who sent the invite request
+     * @param whoReceive Who need accept the invite request
      */
     @Override
     public void invitePlayer(UUID whoSent, UUID whoReceive) {
@@ -38,8 +38,8 @@ public class PartyFactory extends RedisProvider {
     }
 
     /**
-     * @param whoSent       Who sent the invite request
-     * @param whoReceive        Who need accept the invite request
+     * @param whoSent    Who sent the invite request
+     * @param whoReceive Who need accept the invite request
      */
     @Override
     public void removePendingInvite(UUID whoSent, UUID whoReceive) {
@@ -59,8 +59,29 @@ public class PartyFactory extends RedisProvider {
     }
 
     /**
-     * @param whoSent       Who sent the invite request
-     * @param whoReceive        Who need accept the invite request
+     * @param uniqueId    Who usually sent the invite request
+     */
+    @Override
+    public void removePendingInvitesSent(UUID uniqueId) {
+        if (this.isRedisEnabled()) {
+            super.removePendingInvitesSent(uniqueId);
+
+            return;
+        }
+
+        Set<UUID> invitesSent = this.pendingInvitesSent.get(uniqueId);
+
+        if (invitesSent == null) {
+            return;
+        }
+
+        invitesSent.clear();
+        this.pendingInvitesSent.remove(uniqueId);
+    }
+
+    /**
+     * @param whoSent    Who sent the invite request
+     * @param whoReceive Who need accept the invite request
      */
     @Override
     public boolean isPendingInvite(UUID whoSent, UUID whoReceive) {

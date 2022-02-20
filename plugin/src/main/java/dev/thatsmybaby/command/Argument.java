@@ -20,6 +20,7 @@ public abstract class Argument {
     @Getter private final String name;
     @Getter private final String permission;
     @Getter private final String[] aliases;
+    @Getter private final boolean async;
 
     public abstract void execute(ProxiedPlayer proxiedPlayer, String commandLabel, String argumentLabel, String[] args);
 

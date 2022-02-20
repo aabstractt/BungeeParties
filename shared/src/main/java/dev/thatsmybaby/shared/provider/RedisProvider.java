@@ -9,11 +9,7 @@ import java.util.UUID;
 
 public abstract class RedisProvider {
 
-    private RedisBungee redisBungee;
-
-    public RedisProvider() {
-        System.out.println("RedisProvider initialized");
-    }
+    private RedisBungee redisBungee = null;
 
     public void init() {
         Plugin plugin = ProxyServer.getInstance().getPluginManager().getPlugin("RedisBungee");
@@ -29,6 +25,10 @@ public abstract class RedisProvider {
     }
 
     public void removePendingInvite(UUID whoSent, UUID whoReceive) {
+
+    }
+
+    public void removePendingInvitesSent(UUID uniqueId) {
 
     }
 
@@ -53,6 +53,6 @@ public abstract class RedisProvider {
     }
 
     public boolean isRedisEnabled() {
-        return true;
+        return false;
     }
 }
