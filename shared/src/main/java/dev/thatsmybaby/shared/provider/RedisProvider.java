@@ -1,12 +1,11 @@
 package dev.thatsmybaby.shared.provider;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
-import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
-import com.imaginarycode.minecraft.redisbungee.internal.jedis.Jedis;
-import com.imaginarycode.minecraft.redisbungee.internal.jedis.JedisPool;
-import com.imaginarycode.minecraft.redisbungee.internal.jedis.JedisPoolConfig;
-import com.imaginarycode.minecraft.redisbungee.internal.jedis.Protocol;
 import dev.thatsmybaby.shared.object.BungeePartyImpl;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.Protocol;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -14,11 +13,15 @@ import java.util.function.Function;
 
 public abstract class RedisProvider {
 
-    private RedisBungee hook = null;
+    public static String HASH_PLAYER_PARTY_INVITES = "player#party#invites:%s";
+    public static String HASH_PLAYER_PARTY_INVITE_SENT = "player#party#invite#sent:%s";
+
+    protected RedisBungee hook = null;
 
     protected JedisPool jedisPool;
     private String password;
 
+    @SuppressWarnings("deprecation")
     public void init(String address, String password, boolean enabled, RedisBungee plugin) {
         if (!enabled && plugin != null) {
             throw new RuntimeException("Redis is disabled but RedisBungee was hooked...");
@@ -32,6 +35,7 @@ public abstract class RedisProvider {
 
         this.jedisPool = new JedisPool(new JedisPoolConfig() {{
             setMaxWaitMillis(1000 * 200000);
+
             setMaxTotal(8);
         }}, host, port, 1000 * 10, password, false);
 
@@ -47,6 +51,23 @@ public abstract class RedisProvider {
      * @param whoAccept Who accept the request
      */
     public void invitePlayer(UUID whoSent, UUID whoAccept) {
+        this.runTransaction(jedis -> {
+            String hash = String.format(HASH_PLAYER_PARTY_INVITES, whoAccept.toString());
+
+            if (jedis.sismember(hash, whoSent.toString())) {
+                return;
+            }
+
+            jedis.sadd(hash, whoSent.toString());
+
+            hash = String.format(HASH_PLAYER_PARTY_INVITE_SENT, whoSent);
+
+            if (jedis.sismember(hash, whoAccept.toString())) {
+                return;
+            }
+
+            jedis.sadd(hash, whoAccept.toString());
+        });
     }
 
     /**
@@ -66,7 +87,9 @@ public abstract class RedisProvider {
      * @param whoAccept Who accept the request
      */
     public boolean isPendingInvite(UUID whoSent, UUID whoAccept) {
-        return false;
+        return this.runTransaction(jedis -> {
+            return jedis.sismember(String.format(HASH_PLAYER_PARTY_INVITES, whoAccept.toString()), whoSent.toString());
+        });
     }
 
     public BungeePartyImpl getPlayerParty(UUID uniqueId) {
@@ -79,14 +102,6 @@ public abstract class RedisProvider {
 
     public void messageParty(UUID partyUniqueId, String message) {
 
-    }
-
-    public UUID getTargetPlayer(String name) {
-        return RedisBungeeAPI.getRedisBungeeApi().getUuidFromName(name, true);
-    }
-
-    public String getTargetServer(UUID uniqueId) {
-        return this.hook.getDataManager().getServer(uniqueId);
     }
 
     private  <T> T runTransaction(Function<Jedis, T> action) {

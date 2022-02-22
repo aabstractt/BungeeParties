@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>dev.thatsmybaby</groupId>
-        <artifactId>Parties</artifactId>
+        <artifactId>BungeeParties</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 

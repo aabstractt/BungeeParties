@@ -58,7 +58,7 @@ public class AcceptArgument extends Argument {
             return;
         }
 
-        party.addMember(proxiedPlayer);
+        party.addMember(proxiedPlayer.getUniqueId().toString(), proxiedPlayer.getName());
 
         if (factory.enabled()) {
             party.pushUpdate();

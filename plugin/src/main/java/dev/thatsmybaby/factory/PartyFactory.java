@@ -16,6 +16,7 @@ public class PartyFactory extends RedisProvider {
 
     private final HashMap<UUID, Set<UUID>> pendingInvitesSent = new HashMap<>();
 
+    @Override
     public BungeePartyImpl initializeParty(UUID uniqueId) {
         if (this.enabled()) {
             return super.initializeParty(uniqueId);
@@ -150,7 +151,7 @@ public class PartyFactory extends RedisProvider {
 
     public UUID getTargetPlayer(String name) {
         if (this.hooked()) {
-            return super.getTargetPlayer(name);
+            return this.hook.getUuidTranslator().getTranslatedUuid(name, true);
         }
 
         ProxiedPlayer target = ProxyServer.getInstance().getPlayer(name);
@@ -160,7 +161,7 @@ public class PartyFactory extends RedisProvider {
 
     public String getTargetServer(UUID uniqueId) {
         if (this.hooked()) {
-            return super.getTargetServer(uniqueId);
+            return this.hook.getDataManager().getServer(uniqueId);
         }
 
         ProxiedPlayer target = ProxyServer.getInstance().getPlayer(uniqueId);
