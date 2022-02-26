@@ -13,7 +13,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-public class InviteArgument extends Argument {
+public final class InviteArgument extends Argument {
 
     public InviteArgument(String name, String permission, String[] aliases, boolean async) {
         super(name, permission, aliases, async);

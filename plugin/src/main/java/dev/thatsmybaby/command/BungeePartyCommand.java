@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BungeePartyCommand extends Command {
+public final class BungeePartyCommand extends Command {
 
     private final Set<Argument> arguments = new HashSet<>();
 

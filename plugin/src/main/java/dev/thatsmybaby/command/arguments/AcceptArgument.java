@@ -11,7 +11,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.util.UUID;
 
-public class AcceptArgument extends Argument {
+public final class AcceptArgument extends Argument {
 
     public AcceptArgument(String name, String permission, String[] aliases, boolean async) {
         super(name, permission, aliases, async);
@@ -40,7 +40,7 @@ public class AcceptArgument extends Argument {
             return;
         }
 
-        if (factory.isPendingInvite(targetUniqueId, proxiedPlayer.getUniqueId())) {
+        if (!factory.isPendingInvite(targetUniqueId, proxiedPlayer.getUniqueId())) {
             proxiedPlayer.sendMessage(Placeholders.componentsPlaceholders("PLAYER_ALREADY_INVITED", args[0]));
 
             return;
@@ -57,6 +57,8 @@ public class AcceptArgument extends Argument {
         if (party == null && (party = factory.initializeParty(targetUniqueId)) == null) {
             return;
         }
+
+        factory.removePendingInvite(targetUniqueId, proxiedPlayer.getUniqueId());
 
         party.addMember(proxiedPlayer.getUniqueId().toString(), proxiedPlayer.getName());
 

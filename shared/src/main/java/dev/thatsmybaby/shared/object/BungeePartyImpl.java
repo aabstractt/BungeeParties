@@ -3,10 +3,11 @@ package dev.thatsmybaby.shared.object;
 import lombok.Getter;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public class BungeePartyImpl {
+public final class BungeePartyImpl {
 
     @Getter private final UUID uniqueId;
     @Getter private String ownerUniqueId;
@@ -21,6 +22,14 @@ public class BungeePartyImpl {
         this.ownerUniqueId = ownerUniqueId;
 
         this.ownerName = ownerName;
+    }
+
+    public boolean equals(UUID uniqueId) {
+        return this.equals(uniqueId.toString());
+    }
+
+    public boolean equals(String uniqueId) {
+        return this.uniqueId.toString().equals(uniqueId);
     }
 
     public void transferTo(String targetUniqueId, String targetName) {
@@ -45,6 +54,25 @@ public class BungeePartyImpl {
         this.membersUniqueId.remove(uniqueId);
 
         this.membersName.remove(name);
+    }
+
+    public void findNewLeader() {
+        Optional<String> optional = this.membersUniqueId.stream().sorted().findFirst();
+
+        if (!optional.isPresent()) {
+            this.forceDisband();
+
+            return;
+        }
+
+        this.removeMember(this.ownerUniqueId, this.ownerName);
+        this.removeMember(optional.get(), null);
+
+        this.transferTo(optional.get(), null);
+    }
+
+    public void forceDisband() {
+
     }
 
     public void pushUpdate() {

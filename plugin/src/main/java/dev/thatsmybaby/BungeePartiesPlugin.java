@@ -14,7 +14,7 @@ import java.io.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BungeePartiesPlugin extends Plugin {
+public final class BungeePartiesPlugin extends Plugin {
 
     @Getter private static BungeePartiesPlugin instance;
 

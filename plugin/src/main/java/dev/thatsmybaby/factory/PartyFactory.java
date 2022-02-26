@@ -10,7 +10,7 @@ import net.md_5.bungee.chat.ComponentSerializer;
 
 import java.util.*;
 
-public class PartyFactory extends RedisProvider {
+public final class PartyFactory extends RedisProvider {
 
     @Getter private static final PartyFactory instance = new PartyFactory();
 
