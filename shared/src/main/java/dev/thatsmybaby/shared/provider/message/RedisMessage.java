@@ -1,4 +1,4 @@
-package dev.thatsmybaby.factory.message;
+package dev.thatsmybaby.shared.provider.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

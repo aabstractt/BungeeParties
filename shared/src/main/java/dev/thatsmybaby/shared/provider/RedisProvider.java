@@ -1,12 +1,16 @@
 package dev.thatsmybaby.shared.provider;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import dev.thatsmybaby.shared.object.BungeePartyImpl;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.Protocol;
+import dev.thatsmybaby.shared.provider.message.RedisMessage;
+import dev.thatsmybaby.shared.provider.message.RedisMessageReader;
+import redis.clients.jedis.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -16,9 +20,13 @@ public abstract class RedisProvider {
     public static String HASH_PLAYER_PARTY_INVITES = "player#party#invites:%s";
     public static String HASH_PLAYER_PARTY_INVITE_SENT = "player#party#invite#sent:%s";
 
+    protected static Map<Integer, Class<? extends RedisMessage>> messagesPool = new HashMap<>();
+
     protected RedisBungee hook = null;
 
     protected JedisPool jedisPool;
+    protected Subscription jedisPubSub;
+
     private String password;
 
     @SuppressWarnings("deprecation")
@@ -40,6 +48,10 @@ public abstract class RedisProvider {
         }}, host, port, 1000 * 10, password, false);
 
         this.password = password;
+
+        new Thread(() -> runTransaction(jedis -> {
+            jedis.subscribe(this.jedisPubSub = new Subscription(), "BungeeParties");
+        })).start();
     }
 
     public BungeePartyImpl initializeParty(UUID uniqueId) {
@@ -132,5 +144,57 @@ public abstract class RedisProvider {
 
     public boolean enabled() {
         return false;
+    }
+
+    public void close() {
+        if (this.jedisPool != null) {
+            this.jedisPubSub.unsubscribe();
+        }
+
+        if (this.jedisPool != null) {
+            this.jedisPool.destroy();
+        }
+    }
+
+    protected void registerMessage(RedisMessage... pools) {
+        for (RedisMessage pool : pools) {
+            messagesPool.put(pool.getId(), pool.getClass());
+        }
+    }
+
+    protected RedisMessage constructMessage(int id) {
+        Class<? extends RedisMessage> instance = messagesPool.get(id);
+
+        if (instance == null) {
+            return null;
+        }
+
+        try {
+            return instance.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    protected class Subscription extends JedisPubSub {
+
+        @Override
+        public void onMessage(String channel, String message) {
+            Map<String, String> buffer = new Gson().fromJson(message, new TypeToken<Map<String, String>>(){}.getType());
+            RedisMessageReader reader = new RedisMessageReader(new ArrayList<>(buffer.values()));
+
+            RedisMessage pk = constructMessage(reader.readInt());
+
+            if (pk == null) {
+                System.out.println("Packet " + reader.current() + " not found");
+
+                return;
+            }
+
+            pk.decode(reader);
+            pk.handle();
+        }
     }
 }

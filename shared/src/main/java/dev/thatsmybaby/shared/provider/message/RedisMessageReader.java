@@ -1,4 +1,4 @@
-package dev.thatsmybaby.factory.message;
+package dev.thatsmybaby.shared.provider.message;
 
 import com.google.common.collect.Maps;
 import lombok.Getter;
@@ -19,6 +19,10 @@ public class RedisMessageReader {
 
     public RedisMessageReader(int id) {
         this.putInt(id);
+    }
+
+    public Object current() {
+        return this.buffer.get(this.index);
     }
 
     public int readInt() {

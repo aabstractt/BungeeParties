@@ -1,5 +1,6 @@
 package dev.thatsmybaby.factory;
 
+import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import dev.thatsmybaby.factory.message.PartyRedisMessage;
 import dev.thatsmybaby.factory.message.PlayerRedisMessage;
 import dev.thatsmybaby.shared.object.BungeePartyImpl;
@@ -17,6 +18,17 @@ public final class PartyFactory extends RedisProvider {
     @Getter private static final PartyFactory instance = new PartyFactory();
 
     private final HashMap<UUID, Set<UUID>> pendingInvitesSent = new HashMap<>();
+
+    @Override
+    public void init(String address, String password, boolean enabled, RedisBungee plugin) {
+        super.init(address, password, enabled, plugin);
+
+        if (!this.enabled()) {
+            return;
+        }
+
+        registerMessage(new PlayerRedisMessage(), new PartyRedisMessage());
+    }
 
     @Override
     public BungeePartyImpl initializeParty(UUID uniqueId) {

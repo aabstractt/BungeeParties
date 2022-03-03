@@ -49,6 +49,11 @@ public final class BungeePartiesPlugin extends Plugin {
         }
     }
 
+    @Override
+    public void onDisable() {
+        PartyFactory.getInstance().close();
+    }
+
     @SuppressWarnings({"UnstableApiUsage", "ResultOfMethodCallIgnored"})
     private void saveDefaultConfig() {
         if (!this.getDataFolder().exists()) {

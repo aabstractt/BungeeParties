@@ -1,5 +1,8 @@
 package dev.thatsmybaby.factory.message;
 
+import dev.thatsmybaby.shared.provider.message.RedisMessage;
+import dev.thatsmybaby.shared.provider.message.RedisMessageReader;
+
 import java.util.Map;
 import java.util.UUID;
 
