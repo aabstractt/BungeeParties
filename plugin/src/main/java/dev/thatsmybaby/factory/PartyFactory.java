@@ -1,5 +1,7 @@
 package dev.thatsmybaby.factory;
 
+import dev.thatsmybaby.factory.message.PartyRedisMessage;
+import dev.thatsmybaby.factory.message.PlayerRedisMessage;
 import dev.thatsmybaby.shared.object.BungeePartyImpl;
 import dev.thatsmybaby.shared.provider.RedisProvider;
 import lombok.Getter;
@@ -115,15 +117,19 @@ public final class PartyFactory extends RedisProvider {
         return this.getPlayerParty(uniqueId);
     }
 
-    public void messagePlayer(UUID uniqueId, BaseComponent[] components) {
-        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uniqueId);
+    public void messagePlayer(UUID uuid, BaseComponent[] components) {
+        ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uuid);
 
         if (player == null && !this.enabled()) {
             return;
         }
 
         if (player == null) {
-            super.messagePlayer(uniqueId, ComponentSerializer.toString(components));
+            this.redisMessage(new PlayerRedisMessage() {{
+                this.uniqueId = uuid;
+
+                this.text = ComponentSerializer.toString(components);
+            }}.toString());
         } else {
             player.sendMessage(components);
         }
@@ -131,7 +137,11 @@ public final class PartyFactory extends RedisProvider {
 
     public void messageParty(BungeePartyImpl party, BaseComponent[] components) {
         if (this.enabled()) {
-            super.messageParty(party.getUniqueId(), ComponentSerializer.toString(components));
+            this.redisMessage(new PartyRedisMessage() {{
+                this.uniqueId = party.getUniqueId();
+
+                this.text = ComponentSerializer.toString(components);
+            }}.toString());
 
             return;
         }

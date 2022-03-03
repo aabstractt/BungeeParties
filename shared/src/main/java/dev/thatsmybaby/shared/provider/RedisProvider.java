@@ -24,7 +24,7 @@ public abstract class RedisProvider {
     @SuppressWarnings("deprecation")
     public void init(String address, String password, boolean enabled, RedisBungee plugin) {
         if (!enabled && plugin != null) {
-            throw new RuntimeException("Redis is disabled but RedisBungee was hooked...");
+            throw new RuntimeException("Redis is disabled but RedisBungee tried hook...");
         }
 
         this.hook = plugin;
@@ -96,12 +96,14 @@ public abstract class RedisProvider {
         return null;
     }
 
-    public void messagePlayer(UUID uniqueId, String message) {
+    protected void redisMessage(String string) {
+        if (!this.enabled()) {
+            return;
+        }
 
-    }
-
-    public void messageParty(UUID partyUniqueId, String message) {
-
+        runTransaction(jedis -> {
+            jedis.publish("BungeeParties", string);
+        });
     }
 
     private  <T> T runTransaction(Function<Jedis, T> action) {
