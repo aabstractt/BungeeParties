@@ -2,7 +2,6 @@ package dev.thatsmybaby.shared.provider;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import dev.thatsmybaby.shared.object.BungeePartyImpl;
 import dev.thatsmybaby.shared.provider.message.RedisMessage;
 import dev.thatsmybaby.shared.provider.message.RedisMessageReader;
@@ -22,20 +21,18 @@ public abstract class RedisProvider {
 
     protected static Map<Integer, Class<? extends RedisMessage>> messagesPool = new HashMap<>();
 
-    protected RedisBungee hook = null;
+    protected boolean enabled = false;
 
-    protected JedisPool jedisPool;
-    protected Subscription jedisPubSub;
+    protected JedisPool jedisPool = null;
+    protected Subscription jedisPubSub = null;
 
     private String password;
 
     @SuppressWarnings("deprecation")
-    public void init(String address, String password, boolean enabled, RedisBungee plugin) {
-        if (!enabled && plugin != null) {
-            throw new RuntimeException("Redis is disabled but RedisBungee tried hook...");
+    protected void init(String address, String password, boolean enabled) {
+        if (!(this.enabled = enabled)) {
+            return;
         }
-
-        this.hook = plugin;
 
         String[] addressSplit = address.split(":");
         String host = addressSplit[0];
@@ -128,7 +125,7 @@ public abstract class RedisProvider {
         }
     }
 
-    public void runTransaction(Consumer<Jedis> action) {
+    protected void runTransaction(Consumer<Jedis> action) {
         try (Jedis jedis = this.jedisPool.getResource()) {
             if (this.password != null && !this.password.isEmpty()) {
                 jedis.auth(this.password);
@@ -138,12 +135,8 @@ public abstract class RedisProvider {
         }
     }
 
-    public boolean hooked() {
-        return this.hook != null;
-    }
-
     public boolean enabled() {
-        return false;
+        return this.enabled;
     }
 
     public void close() {

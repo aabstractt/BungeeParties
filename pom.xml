@@ -26,13 +26,6 @@
         </repository>
     </distributionManagement>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- BungeeCord-Chat -->
         <dependency>
@@ -47,14 +40,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- RedisBungee -->
-        <dependency>
-            <groupId>com.github.limework</groupId>
-            <artifactId>redisbungee</artifactId>
-            <version>0.6.5</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

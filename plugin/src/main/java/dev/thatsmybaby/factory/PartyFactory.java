@@ -19,21 +19,30 @@ public final class PartyFactory extends RedisProvider {
 
     private final HashMap<UUID, Set<UUID>> pendingInvitesSent = new HashMap<>();
 
-    @Override
-    public void init(String address, String password, boolean enabled, RedisBungee plugin) {
-        super.init(address, password, enabled, plugin);
+    private RedisBungee hook = null;
 
-        if (!this.enabled()) {
-            return;
+    public void init(String address, String password, boolean enabled, RedisBungee plugin) {
+        super.init(address, password, enabled);
+
+        if (!enabled && plugin != null) {
+            throw new RuntimeException("Redis is disabled but RedisBungee tried hook...");
         }
+
+        this.hook = plugin;
 
         registerMessage(new PlayerRedisMessage(), new PartyRedisMessage());
     }
 
     @Override
     public BungeePartyImpl initializeParty(UUID uniqueId) {
-        if (this.enabled()) {
-            return super.initializeParty(uniqueId);
+        if (this.hook != null) {
+            String name = this.getTargetPlayer(uniqueId);
+
+            if (name == null) {
+                return null;
+            }
+
+            return new BungeePartyImpl(uniqueId.toString(), name);
         }
 
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(uniqueId);
@@ -172,7 +181,7 @@ public final class PartyFactory extends RedisProvider {
     }
 
     public UUID getTargetPlayer(String name) {
-        if (this.hooked()) {
+        if (this.hook != null) {
             return this.hook.getUuidTranslator().getTranslatedUuid(name, true);
         }
 
@@ -181,8 +190,18 @@ public final class PartyFactory extends RedisProvider {
         return target != null ? target.getUniqueId() : null;
     }
 
+    public String getTargetPlayer(UUID uniqueId) {
+        if (this.hook != null) {
+            return this.hook.getUuidTranslator().getNameFromUuid(uniqueId, true);
+        }
+
+        ProxiedPlayer target = ProxyServer.getInstance().getPlayer(uniqueId);
+
+        return target != null ? target.getName() : null;
+    }
+
     public String getTargetServer(UUID uniqueId) {
-        if (this.hooked()) {
+        if (this.hook != null) {
             return this.hook.getDataManager().getServer(uniqueId);
         }
 

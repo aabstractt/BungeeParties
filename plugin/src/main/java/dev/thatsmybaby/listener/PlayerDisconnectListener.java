@@ -7,6 +7,8 @@ import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.UUID;
+
 public final class PlayerDisconnectListener implements Listener {
 
     @EventHandler
@@ -28,7 +30,18 @@ public final class PlayerDisconnectListener implements Listener {
         if (!party.equals(player.getUniqueId())) {
             party.removeMember(player.getUniqueId().toString(), player.getName());
         } else {
-            party.findNewLeader();
+            party.removeMember(party.getOwnerUniqueId(), party.getOwnerName());
+
+            String targetUniqueId = party.findFirstLeader();
+
+            if (targetUniqueId == null) {
+                return;
+            }
+
+            String targetName = PartyFactory.getInstance().getTargetPlayer(UUID.fromString(targetUniqueId));
+
+            party.removeMember(targetUniqueId, targetName);
+            party.transferTo(targetUniqueId, targetName);
         }
 
         if (PartyFactory.getInstance().enabled()) {

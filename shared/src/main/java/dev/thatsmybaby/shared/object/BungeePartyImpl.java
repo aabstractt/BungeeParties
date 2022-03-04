@@ -1,12 +1,16 @@
 package dev.thatsmybaby.shared.object;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@AllArgsConstructor @Data @ToString
 public final class BungeePartyImpl {
 
     @Getter private final UUID uniqueId;
@@ -33,15 +37,9 @@ public final class BungeePartyImpl {
     }
 
     public void transferTo(String targetUniqueId, String targetName) {
-        // TODO: Move this to the promote command
-        this.addMember(this.ownerUniqueId, this.ownerName);
-
         this.ownerUniqueId = targetUniqueId;
 
         this.ownerName = targetName;
-
-        // TODO: Move this to the promote command
-        this.removeMember(targetUniqueId, targetName);
     }
 
     public void addMember(String uniqueId, String name) {
@@ -56,19 +54,16 @@ public final class BungeePartyImpl {
         this.membersName.remove(name);
     }
 
-    public void findNewLeader() {
+    public String findFirstLeader() {
         Optional<String> optional = this.membersUniqueId.stream().sorted().findFirst();
 
         if (!optional.isPresent()) {
             this.forceDisband();
 
-            return;
+            return null;
         }
 
-        this.removeMember(this.ownerUniqueId, this.ownerName);
-        this.removeMember(optional.get(), null);
-
-        this.transferTo(optional.get(), null);
+        return optional.get();
     }
 
     public void forceDisband() {

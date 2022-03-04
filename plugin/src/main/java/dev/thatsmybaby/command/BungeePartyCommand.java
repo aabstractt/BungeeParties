@@ -3,6 +3,7 @@ package dev.thatsmybaby.command;
 import dev.thatsmybaby.BungeePartiesPlugin;
 import dev.thatsmybaby.command.arguments.AcceptArgument;
 import dev.thatsmybaby.command.arguments.InviteArgument;
+import dev.thatsmybaby.command.arguments.TransferArgument;
 import dev.thatsmybaby.factory.PartyFactory;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -24,7 +25,8 @@ public final class BungeePartyCommand extends Command {
 
         this.addArguments(
                 new InviteArgument("invite", null, null, PartyFactory.getInstance().enabled()),
-                new AcceptArgument("accept", null, null, PartyFactory.getInstance().enabled())
+                new AcceptArgument("accept", null, null, PartyFactory.getInstance().enabled()),
+                new TransferArgument("transfer", null, null, PartyFactory.getInstance().enabled())
         );
     }
 
